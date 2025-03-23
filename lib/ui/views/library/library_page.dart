@@ -12,17 +12,16 @@ class LibraryPage extends StatefulWidget {
 }
 
 class _LibraryPageState extends State<LibraryPage> {
+  late LibraryBloc libraryBloc;
   @override
   void initState() {
     super.initState();
-    final bloc = context.read<LibraryBloc>();
-    bloc.getSounds(context);
+    libraryBloc = context.read<LibraryBloc>();
+    libraryBloc.getSounds(context);
   }
 
   @override
   Widget build(BuildContext context) {
-    final bloc = context.read<LibraryBloc>();
-
     return BlocBuilder<LibraryBloc, LibraryState>(
       builder: (context, state) {
         return Scaffold(
@@ -42,7 +41,7 @@ class _LibraryPageState extends State<LibraryPage> {
                 for (final path in state.paths)
                   ListTile(
                     title: Text(path),
-                    onTap: () => bloc.playSound(path),
+                    onTap: () => libraryBloc.playSound(path),
                   )
               ],
               if (state is LibraryError) Text(state.message),
