@@ -8,12 +8,14 @@ class SongModel {
   final String path;
   final String absolutePath;
   final String thumb;
+  final Duration? duration;
   SongModel({
     required this.title,
     required this.url,
     required this.path,
     required this.absolutePath,
     required this.thumb,
+    this.duration,
   });
 
   SongModel copyWith({
@@ -22,6 +24,7 @@ class SongModel {
     String? path,
     String? absolutePath,
     String? thumb,
+    Duration? duration,
   }) {
     return SongModel(
       title: title ?? this.title,
@@ -29,6 +32,7 @@ class SongModel {
       path: path ?? this.path,
       absolutePath: absolutePath ?? this.absolutePath,
       thumb: thumb ?? this.thumb,
+      duration: duration ?? this.duration,
     );
   }
 
@@ -39,6 +43,7 @@ class SongModel {
       'path': path,
       'absolutePath': absolutePath,
       'thumb': thumb,
+      'duration': duration?.inSeconds,
     };
   }
 
@@ -47,8 +52,9 @@ class SongModel {
       title: map['title'] as String,
       url: map['url'] as String,
       path: map['path'] as String,
-      absolutePath: map['absolutePath'] ?? '',
+      absolutePath: map['absolutePath'] as String,
       thumb: map['thumb'] as String,
+      duration: Duration(seconds: map['duration'] ?? 0),
     );
   }
 
@@ -58,7 +64,7 @@ class SongModel {
 
   @override
   String toString() {
-    return 'SongModel(title: $title, url: $url, path: $path, absolutePath: $absolutePath, thumb: $thumb)';
+    return 'SongModel(title: $title, url: $url, path: $path, absolutePath: $absolutePath, thumb: $thumb, duration: $duration)';
   }
 
   @override
@@ -69,12 +75,13 @@ class SongModel {
         other.url == url &&
         other.path == path &&
         other.absolutePath == absolutePath &&
-        other.thumb == thumb;
+        other.thumb == thumb &&
+        other.duration == duration;
   }
 
   @override
   int get hashCode {
-    return title.hashCode ^ url.hashCode ^ path.hashCode ^ absolutePath.hashCode ^ thumb.hashCode;
+    return title.hashCode ^ url.hashCode ^ path.hashCode ^ absolutePath.hashCode ^ thumb.hashCode ^ duration.hashCode;
   }
 
   bool get exists => File(path).existsSync();

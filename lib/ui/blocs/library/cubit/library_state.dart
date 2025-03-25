@@ -5,7 +5,11 @@ sealed class LibraryState {
   final SongModel? currentSong;
   final bool? isPlaying;
 
-  LibraryState({this.songs, this.currentSong, this.isPlaying});
+  LibraryState({
+    this.songs,
+    this.currentSong,
+    this.isPlaying,
+  });
 }
 
 class LibraryInitial extends LibraryState {

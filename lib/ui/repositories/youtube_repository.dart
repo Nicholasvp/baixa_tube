@@ -31,6 +31,7 @@ class YoutubeRepository {
       path: fileName,
       absolutePath: file.absolute.path,
       thumb: video.thumbnails.highResUrl,
+      duration: video.duration,
     );
 
     List<String> reponse = await local.getData(LocalDataKey.songs.name) ?? [];

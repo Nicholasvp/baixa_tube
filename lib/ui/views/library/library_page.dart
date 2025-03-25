@@ -75,6 +75,12 @@ class _LibraryPageState extends State<LibraryPage> {
                             ),
                             const Spacer(),
                             IconButton(
+                              icon: const Icon(Icons.open_in_new),
+                              onPressed: () {
+                                libraryBloc.openFolder(song.path);
+                              },
+                            ),
+                            IconButton(
                               icon: const Icon(Icons.delete),
                               onPressed: () {
                                 libraryBloc.deleteSound(song, context);
@@ -105,34 +111,68 @@ class _LibraryPageState extends State<LibraryPage> {
               if (state is! LibrarySuccess) {
                 return const SizedBox.shrink();
               }
-              return Container(
-                color: Colors.white,
-                padding: const EdgeInsets.all(16),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.skip_previous),
-                      onPressed: () {
-                        libraryBloc.previousSound();
-                      },
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  StreamBuilder<Duration>(
+                    stream: libraryBloc.player.positionStream,
+                    builder: (context, snapshot) {
+                      final position = snapshot.data ?? Duration.zero;
+                      final duration = libraryBloc.player.duration ?? Duration.zero;
+                      return Row(
+                        children: [
+                          Text(
+                            '${position.inMinutes.toString().padLeft(2, '0')}:${position.inSeconds.remainder(60).toString().padLeft(2, '0')}',
+                            style: const TextStyle(fontSize: 12),
+                          ),
+                          Expanded(
+                            child: Slider(
+                              activeColor: Colors.blue,
+                              value: position.inSeconds.toDouble(),
+                              max: duration.inSeconds.toDouble(),
+                              onChanged: (value) {
+                                libraryBloc.seekSound(Duration(seconds: value.toInt()));
+                              },
+                            ),
+                          ),
+                          Text(
+                            '${(duration - position).inMinutes.toString().padLeft(2, '0')}:${(duration - position).inSeconds.remainder(60).toString().padLeft(2, '0')}',
+                            style: const TextStyle(fontSize: 12),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                  Container(
+                    color: Colors.white,
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.skip_previous),
+                          onPressed: () {
+                            libraryBloc.previousSound();
+                          },
+                        ),
+                        IconButton(
+                          icon: Icon(
+                            state.isPlaying! ? Icons.pause : Icons.play_arrow,
+                          ),
+                          onPressed: () {
+                            state.isPlaying! ? libraryBloc.pauseSound() : libraryBloc.playSound();
+                          },
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.skip_next),
+                          onPressed: () {
+                            libraryBloc.nextSound();
+                          },
+                        ),
+                      ],
                     ),
-                    IconButton(
-                      icon: Icon(
-                        state.isPlaying! ? Icons.pause : Icons.play_arrow,
-                      ),
-                      onPressed: () {
-                        state.isPlaying! ? libraryBloc.pauseSound() : libraryBloc.playSound();
-                      },
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.skip_next),
-                      onPressed: () {
-                        libraryBloc.nextSound();
-                      },
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               );
             },
           ),
