@@ -70,12 +70,22 @@ class HomePage extends StatelessWidget {
                     return Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Text(
-                          'Baixa Tube',
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                          ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Text(
+                              'Baixa Tube',
+                              style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Image.asset(
+                              'assets/icons/baixa_tube_logo.png',
+                              width: 50,
+                              height: 50,
+                            ),
+                          ],
                         ),
                         Gap.medium,
                         TextFieldPrimary(

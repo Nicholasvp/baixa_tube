@@ -19,6 +19,8 @@ dependencies:
   bloc: ^9.0.0
   just_audio_windows: ^0.2.2
   just_audio: ^0.9.46
+  shared_preferences: ^2.3.3
+  flutter_launcher_icons: ^0.14.3
 
 dev_dependencies:
   flutter_test:
@@ -33,3 +35,10 @@ flutter:
     - assets/
     - assets/audio/
     - assets/icons/
+
+flutter_launcher_icons:
+  file: "assets/icons/baixa_tube_logo.png"
+  windows:
+    generate: true
+    image_path: "assets/icons/baixa_tube_logo.png"
+    icon_size: 48 

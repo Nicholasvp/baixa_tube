@@ -8,27 +8,15 @@ final class LibraryInitial extends LibraryState {}
 final class LibraryLoading extends LibraryState {}
 
 final class LibrarySuccess extends LibraryState {
-  final List<String> paths;
+  final List<SongModel> songs;
+  final bool isPlaying;
+  final SongModel? currentSong;
 
-  LibrarySuccess(this.paths);
+  LibrarySuccess({required this.songs, required this.isPlaying, this.currentSong});
 }
 
 final class LibraryError extends LibraryState {
   final String message;
 
   LibraryError(this.message);
-}
-
-final class LibraryDeleteSuccess extends LibraryState {}
-
-final class LibraryPlaying extends LibraryState {
-  final String path;
-
-  LibraryPlaying(this.path);
-}
-
-final class LibraryPaused extends LibraryState {
-  final String path;
-
-  LibraryPaused(this.path);
 }
