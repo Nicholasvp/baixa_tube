@@ -23,13 +23,13 @@ class SnackbarApp {
   static Color _getColor(SnackbarType type) {
     switch (type) {
       case SnackbarType.success:
-        return Colors.green;
+        return Colors.blue;
       case SnackbarType.error:
         return Colors.red;
       case SnackbarType.warning:
         return Colors.orange;
       case SnackbarType.info:
-        return Colors.blue;
+        return Colors.white;
       default:
         return Colors.black;
     }

@@ -16,9 +16,10 @@ class _LibraryPageState extends State<LibraryPage> {
   late LibraryBloc libraryBloc;
   @override
   void initState() {
-    super.initState();
     libraryBloc = context.read<LibraryBloc>();
-    libraryBloc.getSounds(context);
+    libraryBloc.getSounds();
+
+    super.initState();
   }
 
   @override
@@ -40,16 +41,17 @@ class _LibraryPageState extends State<LibraryPage> {
             child: Column(
               children: [
                 if (state is LibraryLoading) const CircularProgressIndicator(),
-                if (state is LibrarySuccess) ...[
-                  for (final song in state.songs)
+                if (state.songs?.isNotEmpty ?? false) ...[
+                  for (final song in state.songs!)
                     InkWell(
                       onTap: () {
-                        libraryBloc.playSound(state.songs, song);
+                        libraryBloc.setCurrentSound(song);
                       },
                       child: Container(
                         padding: const EdgeInsets.all(16),
-                        decoration: const BoxDecoration(
-                          border: Border(
+                        decoration: BoxDecoration(
+                          color: state.currentSong == song ? Colors.blue[300] : Colors.white,
+                          border: const Border(
                             top: BorderSide(
                               color: Colors.black,
                               width: 2,
@@ -75,7 +77,7 @@ class _LibraryPageState extends State<LibraryPage> {
                             IconButton(
                               icon: const Icon(Icons.delete),
                               onPressed: () {
-                                libraryBloc.deleteSound(state.songs, song, context);
+                                libraryBloc.deleteSound(song, context);
                               },
                             ),
                           ],
@@ -91,7 +93,7 @@ class _LibraryPageState extends State<LibraryPage> {
                           text: 'Limpar tudo',
                           loading: false,
                           onPressed: () {
-                            libraryBloc.local.clearData();
+                            libraryBloc.clearData();
                           })
                     ],
                   ),
@@ -112,23 +114,21 @@ class _LibraryPageState extends State<LibraryPage> {
                     IconButton(
                       icon: const Icon(Icons.skip_previous),
                       onPressed: () {
-                        libraryBloc.previousSound(state.songs, state.currentSong);
+                        libraryBloc.previousSound();
                       },
                     ),
                     IconButton(
                       icon: Icon(
-                        state.isPlaying ? Icons.pause : Icons.play_arrow,
+                        state.isPlaying! ? Icons.pause : Icons.play_arrow,
                       ),
                       onPressed: () {
-                        state.isPlaying
-                            ? libraryBloc.pauseSound(state.songs, state.currentSong)
-                            : libraryBloc.playSound(state.songs, state.currentSong);
+                        state.isPlaying! ? libraryBloc.pauseSound() : libraryBloc.playSound();
                       },
                     ),
                     IconButton(
                       icon: const Icon(Icons.skip_next),
                       onPressed: () {
-                        libraryBloc.nextSound(state.songs, state.currentSong);
+                        libraryBloc.nextSound();
                       },
                     ),
                   ],

@@ -22,16 +22,17 @@ class ButtonPrimary extends StatelessWidget {
           color: loading ? Colors.grey : Colors.blue,
           borderRadius: BorderRadius.circular(8.0),
         ),
+        height: 60,
         child: Center(
           child: loading
               ? const CircularProgressIndicator.adaptive(
                   valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                 )
               : Text(
-                  text,
+                  text.toUpperCase(),
                   style: const TextStyle(
                     color: Colors.white,
-                    fontSize: 16.0,
+                    fontSize: 20.0,
                     fontWeight: FontWeight.bold,
                   ),
                 ),

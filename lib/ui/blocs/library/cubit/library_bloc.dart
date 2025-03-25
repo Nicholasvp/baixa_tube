@@ -13,69 +13,78 @@ part 'library_state.dart';
 class LibraryBloc extends Cubit<LibraryState> {
   LibraryBloc() : super(LibraryInitial());
 
-  final player = AudioPlayer();
   final local = LocalRepository();
+  final player = AudioPlayer();
 
-  void getSounds(BuildContext context) async {
+  void getSounds() async {
     emit(LibraryLoading());
     final result = await local.getData(LocalDataKey.songs.name);
     if (result != null) {
       final songs = result.map((e) => SongModel.fromJson(e)).toList();
-      emit(LibrarySuccess(songs: songs, isPlaying: false));
-      setCurrentSound(songs, songs[0]);
+      emit(LibrarySuccess(songs: songs, isPlaying: false, currentSong: songs.isNotEmpty ? songs[0] : null));
     } else {
-      emit(LibraryError('Nenhuma música encontrada'));
+      emit(LibraryError(message: 'Nenhuma música encontrada'));
     }
   }
 
-  void setCurrentSound(List<SongModel> songs, SongModel? songModel) {
-    emit(LibrarySuccess(songs: songs, isPlaying: false, currentSong: songModel));
-    playSound(songs, songModel);
+  void setCurrentSound(SongModel? songModel) {
+    pauseSound();
+    emit(LibrarySuccess(songs: state.songs, currentSong: songModel, isPlaying: false));
+    playSound();
   }
 
-  void playSound(List<SongModel> songs, SongModel? songModel) async {
-    if (songModel == null) return;
+  void playSound() async {
     try {
-      await player.setAsset(songModel.path);
-      player.play();
-      emit(LibrarySuccess(songs: songs, isPlaying: true, currentSong: songModel));
+      await Future.delayed(const Duration(milliseconds: 100));
+      await player.setFilePath(state.currentSong!.absolutePath);
+      await player.play();
+      emit(LibrarySuccess(
+        songs: state.songs,
+        currentSong: state.currentSong,
+        isPlaying: true,
+      ));
     } catch (e) {
-      emit(LibraryError(e.toString()));
+      emit(LibraryError(
+        songs: state.songs,
+        currentSong: state.currentSong,
+        isPlaying: false,
+        message: e.toString(),
+      ));
     }
   }
 
-  void pauseSound(List<SongModel> songs, SongModel? songModel) async {
+  void pauseSound() async {
     try {
       await player.pause();
-      emit(LibrarySuccess(songs: songs, isPlaying: false, currentSong: songModel));
+      emit(LibrarySuccess(
+        songs: state.songs,
+        currentSong: state.currentSong,
+        isPlaying: false,
+      ));
     } catch (e) {
-      emit(LibraryError(e.toString()));
+      emit(LibraryError(message: e.toString()));
     }
   }
 
-  void nextSound(List<SongModel> songs, SongModel? songModel) async {
-    pauseSound(songs, songModel);
-    if (songModel == null) return;
-    final index = songs.indexOf(songModel);
-    if (index == songs.length - 1) {
-      playSound(songs, songs.first);
+  void nextSound() {
+    if (state.songs!.indexOf(state.currentSong!) < state.songs!.length - 1) {
+      pauseSound();
+      setCurrentSound(state.songs![state.songs!.indexOf(state.currentSong!) + 1]);
+      playSound();
     } else {
-      playSound(songs, songs[index + 1]);
+      pauseSound();
+      setCurrentSound(state.songs![0]);
+      playSound();
     }
   }
 
-  void previousSound(List<SongModel> songs, SongModel? songModel) async {
-    pauseSound(songs, songModel);
-    if (songModel == null) return;
-    final index = songs.indexOf(songModel);
-    if (index == 0) {
-      playSound(songs, songs.last);
-    } else {
-      playSound(songs, songs[index - 1]);
+  void previousSound() {
+    if (state.songs!.indexOf(state.currentSong!) > 0) {
+      setCurrentSound(state.songs![state.songs!.indexOf(state.currentSong!) - 1]);
     }
   }
 
-  void deleteSound(List<SongModel> songs, SongModel songModel, BuildContext context) async {
+  void deleteSound(SongModel songModel, BuildContext context) async {
     bool confirmation = false;
 
     await ModalPrimary.confirmationModal(
@@ -95,7 +104,13 @@ class LibraryBloc extends Cubit<LibraryState> {
       if (await file.exists()) {
         await file.delete();
       }
-      emit(LibrarySuccess(songs: list, isPlaying: false));
+      emit(LibrarySuccess(songs: list, currentSong: state.currentSong, isPlaying: false));
     }
+  }
+
+  void clearData() {
+    emit(LibraryLoading());
+    local.clearData();
+    emit(LibraryError(message: 'Nenhuma música encontrada'));
   }
 }

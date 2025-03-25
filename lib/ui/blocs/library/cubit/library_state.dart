@@ -1,22 +1,27 @@
 part of 'library_bloc.dart';
 
-@immutable
-sealed class LibraryState {}
-
-final class LibraryInitial extends LibraryState {}
-
-final class LibraryLoading extends LibraryState {}
-
-final class LibrarySuccess extends LibraryState {
-  final List<SongModel> songs;
-  final bool isPlaying;
+sealed class LibraryState {
+  final List<SongModel>? songs;
   final SongModel? currentSong;
+  final bool? isPlaying;
 
-  LibrarySuccess({required this.songs, required this.isPlaying, this.currentSong});
+  LibraryState({this.songs, this.currentSong, this.isPlaying});
 }
 
-final class LibraryError extends LibraryState {
-  final String message;
+class LibraryInitial extends LibraryState {
+  LibraryInitial({super.songs, super.currentSong, super.isPlaying});
+}
 
-  LibraryError(this.message);
+class LibraryLoading extends LibraryState {
+  LibraryLoading({super.songs, super.currentSong, super.isPlaying});
+}
+
+class LibrarySuccess extends LibraryState {
+  LibrarySuccess({super.songs, super.currentSong, super.isPlaying});
+}
+
+class LibraryError extends LibraryState {
+  LibraryError({super.songs, super.currentSong, super.isPlaying, required this.message});
+
+  final String message;
 }

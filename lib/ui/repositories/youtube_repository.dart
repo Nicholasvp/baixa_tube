@@ -25,10 +25,18 @@ class YoutubeRepository {
     var file = File(fileName);
     var fileStream = file.openWrite();
 
-    SongModel songModel = SongModel(title: video.title, url: video.url, path: fileName, thumb: video.thumbnails.highResUrl);
+    SongModel songModel = SongModel(
+      title: video.title,
+      url: video.url,
+      path: fileName,
+      absolutePath: file.absolute.path,
+      thumb: video.thumbnails.highResUrl,
+    );
 
     List<String> reponse = await local.getData(LocalDataKey.songs.name) ?? [];
-    reponse.add(songModel.toJson());
+    if (!reponse.contains(songModel.toJson())) {
+      reponse.add(songModel.toJson());
+    }
 
     await local.saveData(
       LocalDataKey.songs.name,
