@@ -1,15 +1,60 @@
+import 'dart:io';
+
 import 'package:baixa_tube/core/routes/routes.dart';
 import 'package:baixa_tube/core/widgets/buttons/button_primary.dart';
 import 'package:baixa_tube/core/widgets/gaps/gap.dart';
 import 'package:baixa_tube/core/widgets/snackbars/snackbar_app.dart';
 import 'package:baixa_tube/core/widgets/text_field/text_field_primary.dart';
 import 'package:baixa_tube/ui/blocs/home/home_bloc.dart';
+import 'package:ffmpeg_helper/helpers/ffmpeg_helper_class.dart';
+import 'package:ffmpeg_helper/helpers/helper_progress.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  final downloadProgress = ValueNotifier<FFMpegProgress?>(null);
+  bool ffmpegPresent = false;
+  final ffmpeg = FFMpegHelper.instance;
+  @override
+  void initState() {
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      downloadFFMpeg();
+    });
+    super.initState();
+  }
+
+  Future<void> verifyFFMpeg() async {
+    if (Platform.isWindows) {
+      final success = await ffmpeg.isFFMpegPresent();
+      setState(() {
+        ffmpegPresent = success;
+      });
+    }
+  }
+
+  Future<void> downloadFFMpeg() async {
+    await verifyFFMpeg();
+    if (Platform.isWindows && !ffmpegPresent) {
+      bool success = await ffmpeg.setupFFMpegOnWindows(
+        onProgress: (FFMpegProgress progress) {
+          downloadProgress.value = progress;
+        },
+      );
+      setState(() {
+        ffmpegPresent = success;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,28 +69,63 @@ class HomePage extends StatelessWidget {
         ),
         child: Column(
           children: [
-            InkWell(
-              onTap: () {
-                context.go(Routes.library);
-              },
-              child: Container(
-                margin: const EdgeInsets.all(16),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    const Text('IR PARA A BIBLIOTECA', style: TextStyle(color: Colors.white)),
-                    IconButton(
-                      icon: const Icon(
-                        Icons.library_books,
-                        color: Colors.white,
-                      ),
-                      onPressed: () {
-                        context.go('/library');
+            Row(
+              children: [
+                if (!ffmpegPresent && downloadProgress.value != null)
+                  SizedBox(
+                    width: 300,
+                    child: ValueListenableBuilder<FFMpegProgress?>(
+                      valueListenable: downloadProgress,
+                      builder: (BuildContext context, FFMpegProgress? value, _) {
+                        print(value!.downloaded / value.fileSize);
+                        double? prog;
+                        if ((value.downloaded != 0) && (value.fileSize != 0)) {
+                          prog = value.downloaded / value.fileSize;
+                        } else {
+                          prog = 0;
+                        }
+                        if (value.phase == FFMpegProgressPhase.decompressing) {
+                          prog = null;
+                        }
+                        if (value.phase == FFMpegProgressPhase.inactive) {
+                          return const SizedBox.shrink();
+                        }
+                        return Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(value.phase.name),
+                            const SizedBox(height: 5),
+                            LinearProgressIndicator(value: prog),
+                          ],
+                        );
                       },
                     ),
-                  ],
+                  ),
+                const Spacer(),
+                InkWell(
+                  onTap: () {
+                    context.go(Routes.library);
+                  },
+                  child: Container(
+                    margin: const EdgeInsets.all(16),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        const Text('IR PARA A BIBLIOTECA', style: TextStyle(color: Colors.white)),
+                        IconButton(
+                          icon: const Icon(
+                            Icons.library_books,
+                            color: Colors.white,
+                          ),
+                          onPressed: () {
+                            context.go('/library');
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
+              ],
             ),
             const Spacer(),
             Center(
@@ -118,6 +198,32 @@ class HomePage extends StatelessWidget {
               ),
             ),
             const Spacer(),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  margin: const EdgeInsets.all(16),
+                  child: InkWell(
+                    onTap: () {
+                      launchUrl(Uri.parse('https://github.com/nicholasvp'));
+                    },
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        const Text('Feito por nicholasvp', style: TextStyle(color: Colors.white)),
+                        Gap.medium,
+                        SvgPicture.asset(
+                          'assets/icons/github.svg',
+                          width: 24,
+                          height: 24,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            Gap.extraLarge,
           ],
         ),
       ),

@@ -1,10 +1,12 @@
 import 'package:baixa_tube/core/routes/routes.dart';
 import 'package:baixa_tube/ui/blocs/home/home_bloc.dart';
 import 'package:baixa_tube/ui/blocs/library/cubit/library_bloc.dart';
+import 'package:ffmpeg_helper/helpers/ffmpeg_helper_class.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-void main() {
+void main() async {
+  await FFMpegHelper.instance.initialize();
   runApp(const MyApp());
 }
 

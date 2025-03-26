@@ -5,4 +5,5 @@ class Gap {
   static const Widget medium = SizedBox(height: 16, width: 16);
   static const Widget large = SizedBox(height: 24, width: 24);
   static const Widget extraLarge = SizedBox(height: 32, width: 32);
+  static const Widget extraExtraLarge = SizedBox(height: 48, width: 48);
 }
